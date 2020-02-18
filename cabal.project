@@ -13,13 +13,13 @@ package cardano-crypto
 source-repository-package
   type: git
   location: https://github.com/input-output-hk/cardano-prelude
-  tag: fa7a16291d3e93b068d9b13620fc81c88b5600f0
+  tag: cb4c0673b1d7220e3f18b808ff959e0060e61988
   --sha256: 1gaj8k5kjdkmnc0l569asc0fwxi0413v1r0piccg8kyscwvhvcwz
 
 source-repository-package
   type: git
   location: https://github.com/input-output-hk/cardano-prelude
-  tag: fa7a16291d3e93b068d9b13620fc81c88b5600f0
+  tag: cb4c0673b1d7220e3f18b808ff959e0060e61988
   --sha256: 1gaj8k5kjdkmnc0l569asc0fwxi0413v1r0piccg8kyscwvhvcwz
   subdir: test
 

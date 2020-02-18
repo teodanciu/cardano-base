@@ -38,7 +38,7 @@ import Data.Kind (Type)
 
 import Cardano.Binary.Deserialize (decodeFullDecoder)
 import Cardano.Binary.FromCBOR
-  (Decoder, DecoderError, FromCBOR(..), decodeWithByteSpan, decodeListWith, fromCBORMaybe)
+  (Decoder, DecoderError, FromCBOR(..), decodeListWith, decodeWithByteSpan, fromCBORMaybe)
 import Cardano.Binary.ToCBOR
   (ToCBOR)
 import Cardano.Binary.Serialize (serialize')
