@@ -43,12 +43,14 @@ library
 
                        Cardano.Crypto.KES.Class
                        Cardano.Crypto.KES.Mock
+                       Cardano.Crypto.KES.ForgetMock
                        Cardano.Crypto.KES.NeverUsed
                        Cardano.Crypto.KES.Simple
                        Cardano.Crypto.KES.Single
                        Cardano.Crypto.KES.Sum
 
                        Cardano.Crypto.PinnedSizedBytes
+                       Cardano.Crypto.SafePinned
                        Cardano.Crypto.Seed
                        Cardano.Crypto.Util
 
@@ -84,6 +86,8 @@ library
                      , memory
                      , nothunks
                      , primitive
+                     , random
+                     , stm
                      , text
                      , transformers
                      , vector
