@@ -26,6 +26,7 @@ library
                        Test.Crypto.Hash
                        Test.Crypto.KES
                        Test.Crypto.Util
+                       Test.Crypto.RunIO
                        Test.Crypto.VRF
                        Test.Crypto.Instances
                        Bench.Crypto.VRF
@@ -42,6 +43,7 @@ library
                      , containers
                      , cryptonite
                      , formatting
+                     , mtl
                      , nothunks
                      , QuickCheck
                      , quickcheck-instances
