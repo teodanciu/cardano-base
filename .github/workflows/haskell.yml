@@ -92,6 +92,30 @@ jobs:
         echo "LIBSODIUM_PATH=$LIBSODIUM_PATH"
         echo "$LIBSODIUM_PATH" >> $GITHUB_PATH
 
+    - name: Install blst (Linux)
+      if: matrix.os == 'ubuntu-latest'
+      run: |
+        mkdir blst-sources
+        cd blst-sources
+        git clone https://github.com/supranational/blst
+        cd blst
+        ./build.sh
+        sudo install libblst.a /usr/local/lib/
+        sudo cp bindings/*.h /usr/local/include/
+        cd ../..
+
+    - name: Install blst (MacOS)
+      if: matrix.os == 'macos-latest'
+      run: |
+        mkdir blst-sources
+        cd blst-sources
+        git clone https://github.com/supranational/blst
+        cd blst
+        ./build.sh
+        sudo install libblst.a /usr/local/lib/libblst.a
+        sudo cp bindings/*.h /usr/local/include/
+        cd ../..
+
     - uses: haskell/actions/setup@v1
       id: setup-haskell
       with:
