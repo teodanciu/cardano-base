@@ -26,11 +26,19 @@ module Cardano.Binary.Annotated
   )
 where
 
-import Cardano.Prelude
+import Prelude 
 
 import Codec.CBOR.Read (ByteOffset)
+import Control.DeepSeq (NFData)
 import Data.Aeson (FromJSON(..), ToJSON(..))
+import Data.Bifunctor(Bifunctor, first, second)
+import qualified Data.ByteString as BS
 import qualified Data.ByteString.Lazy as BSL
+import Data.Function (on)
+import Data.Functor((<&>))
+import Data.Kind (Type)
+import Data.Text (Text)
+import GHC.Generics (Generic)
 import NoThunks.Class (NoThunks)
 
 import Cardano.Binary.Deserialize (decodeFullDecoder)
@@ -43,7 +51,7 @@ import Cardano.Binary.Serialize (serialize')
 
 
 -- | Extract a substring of a given ByteString corresponding to the offsets.
-slice :: BSL.ByteString -> ByteSpan -> LByteString
+slice :: BSL.ByteString -> ByteSpan -> BSL.ByteString
 slice bytes (ByteSpan start end) =
   BSL.take (end - start) $ BSL.drop start bytes
 
@@ -82,7 +90,7 @@ annotatedDecoder d = decodeWithByteSpan d
 fromCBORAnnotated :: FromCBOR a => Decoder s (Annotated a ByteSpan)
 fromCBORAnnotated = annotatedDecoder fromCBOR
 
-annotationBytes :: Functor f => LByteString -> f ByteSpan -> f ByteString
+annotationBytes :: Functor f => BSL.ByteString -> f ByteSpan -> f BS.ByteString
 annotationBytes bytes = fmap (BSL.toStrict . slice bytes)
 
 -- | Decodes a value from a ByteString, requiring that the full ByteString is consumed, and
@@ -91,21 +99,21 @@ decodeFullAnnotatedBytes
   :: Functor f
   => Text
   -> (forall s . Decoder s (f ByteSpan))
-  -> LByteString
-  -> Either DecoderError (f ByteString)
+  -> BSL.ByteString
+  -> Either DecoderError (f BS.ByteString)
 decodeFullAnnotatedBytes lbl decoder bytes =
   annotationBytes bytes <$> decodeFullDecoder lbl decoder bytes
 
 -- | Reconstruct an annotation by re-serialising the payload to a ByteString.
-reAnnotate :: ToCBOR a => Annotated a b -> Annotated a ByteString
+reAnnotate :: ToCBOR a => Annotated a b -> Annotated a BS.ByteString
 reAnnotate (Annotated x _) = Annotated x (serialize' x)
 
 class Decoded t where
   type BaseType t :: Type
-  recoverBytes :: t -> ByteString
+  recoverBytes :: t -> BS.ByteString
 
-instance Decoded (Annotated b ByteString) where
-  type BaseType (Annotated b ByteString) = b
+instance Decoded (Annotated b BS.ByteString) where
+  type BaseType (Annotated b BS.ByteString) = b
   recoverBytes = annotation
 
 -------------------------------------------------------------------------
@@ -114,7 +122,7 @@ instance Decoded (Annotated b ByteString) where
 
 -- | This marks the entire bytestring used during decoding, rather than the
 -- | piece we need to finish constructing our value.
-newtype FullByteString = Full LByteString
+newtype FullByteString = Full BSL.ByteString
 
 -- | A value of type `Annotator a` is one that needs access to the entire
 -- | bytestring used during decoding to finish construction.
@@ -123,21 +131,21 @@ newtype Annotator a = Annotator { runAnnotator :: FullByteString -> a }
 
 -- | The argument is a decoder for a annotator that needs access to the bytes that
 -- | were decoded. This function constructs and supplies the relevant piece.
-annotatorSlice :: Decoder s (Annotator (LByteString -> a)) -> Decoder s (Annotator a)
+annotatorSlice :: Decoder s (Annotator (BSL.ByteString -> a)) -> Decoder s (Annotator a)
 annotatorSlice dec = do
   (k,bytes) <- withSlice dec
   pure $ k <*> bytes
 
 -- | Pairs the decoder result with an annotator.
-withSlice :: Decoder s a -> Decoder s (a, Annotator LByteString)
+withSlice :: Decoder s a -> Decoder s (a, Annotator BSL.ByteString)
 withSlice dec = do
   (r, start, end) <- decodeWithByteSpan dec
   return (r, Annotator $ sliceOffsets start end)
   where
-  sliceOffsets :: ByteOffset -> ByteOffset -> FullByteString -> LByteString
+  sliceOffsets :: ByteOffset -> ByteOffset -> FullByteString -> BSL.ByteString
   sliceOffsets start end (Full b) = (BSL.take (end - start) . BSL.drop start) b
 
 -- | Supplies the bytestring argument to both the decoder and the produced annotator.
-decodeAnnotator :: Text -> (forall s. Decoder s (Annotator a)) -> LByteString -> Either DecoderError a
+decodeAnnotator :: Text -> (forall s. Decoder s (Annotator a)) -> BSL.ByteString -> Either DecoderError a
 decodeAnnotator label' decoder bytes =
   (\x -> runAnnotator x (Full bytes)) <$> decodeFullDecoder label' decoder bytes
