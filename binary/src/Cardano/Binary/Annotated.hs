@@ -26,8 +26,6 @@ module Cardano.Binary.Annotated
   )
 where
 
-import Prelude 
-
 import Codec.CBOR.Read (ByteOffset)
 import Control.DeepSeq (NFData)
 import Data.Aeson (FromJSON(..), ToJSON(..))
