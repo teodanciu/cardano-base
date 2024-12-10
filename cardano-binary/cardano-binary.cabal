@@ -85,7 +85,7 @@ test-suite test
 
   build-depends:
     QuickCheck,
-    base,
+      base,
     bytestring,
     cardano-binary,
     cardano-prelude-test,
